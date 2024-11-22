@@ -1,8 +1,8 @@
 using UniversiteDomain.Entities;
- 
-namespace UniversiteDomain.Adapters;
- 
-public interface IEtudiantRepository : IRepository<Etudiant>
-{
 
+namespace UniversiteDomain.Adapters;
+
+public interface IUeRepository : IRepository<Ue>
+{
+    
 }
