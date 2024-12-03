@@ -30,16 +30,16 @@ public class UeUnitTest
         // On initialise une fausse datasource qui va simuler un EtudiantRepository
         var mock = new Mock<IRepositoryFactory>();
         
-        // Il faut ensuite aller dans le use case pour voir quelles fonctions simuler
+        // Il faut ensuite aller dans l'use case pour voir quelles fonctions simuler.
         // Nous devons simuler FindByCondition et Create
         
-        // Simulation de la fonction FindByCondition    
+        // Simulation de la fonction FindByCondition 
         // On dit à ce mock que l'étudiant n'existe pas déjà
         // La réponse à l'appel FindByCondition est donc une liste vide
         var reponseFindByCondition = new List<Ue>();
         
         // On crée un bouchon dans le mock pour la fonction FindByCondition
-        // Quelque soit le paramètre de la fonction FindByCondition, on renvoie la liste vide
+        // Quel que soit le paramètre de la fonction FindByCondition, on renvoie la liste vide
         mock.Setup(repo=>repo.UeRepository().FindByConditionAsync(It.IsAny<Expression<Func<Ue, bool>>>())).ReturnsAsync(reponseFindByCondition);
         
         // Simulation de la fonction Create

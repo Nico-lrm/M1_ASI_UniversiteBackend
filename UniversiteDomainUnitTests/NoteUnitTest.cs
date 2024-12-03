@@ -22,6 +22,18 @@ public class NoteUnitTest
         long idEtudiant = 1;
         long idUe = 2;
         long idParcours = 3;
+        float value = 10.0f;
+        
+        Etudiant etudiant = new Etudiant{Id=1, NumEtud="1", Nom = "DURAND", Prenom="Jean", Email="jean.durand@hotmail.fr"};
+        Ue ue = new Ue { Id = 1, NumeroUe = "1", Intitule = "MonUE" };
+        Parcours parcours = new Parcours{ Id = 3, NomParcours = "Ue 3", Annee = 1 };
+        Note note = new Note { etudiant = etudiant, idEtud = idEtudiant, idUe = idUe, ue = ue, valeur = value };
+        
+        // On initialise des faux repositories
+        var mockUe = new Mock<IUeRepository>();
+        var mockParcours = new Mock<IParcoursRepository>();
+        var mockEtudiant = new Mock<IEtudiantRepository>();
+        var mockNote = new Mock<INoteRepository>();
     }
     
     [Test]
