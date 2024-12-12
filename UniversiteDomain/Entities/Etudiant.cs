@@ -11,7 +11,7 @@ public class Etudiant
     // ManyToOne : l'étudiant est inscrit dans un parcours
     public Parcours? ParcoursSuivi { get; set; } = null;
     
-    //
+    // ManyToOne : L'étudiant possède plusieurs notes
     public List<Note>? NotesObtenues { get; set; } = new();
     
 

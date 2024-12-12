@@ -1,4 +1,4 @@
-namespace UniversiteDomain.Exceptions.NoteExceptions;
+namespace UniversiteDomain.Exceptions.ParcoursExceptions;
 
 public class InscriptionNotFoundException : Exception
 {
