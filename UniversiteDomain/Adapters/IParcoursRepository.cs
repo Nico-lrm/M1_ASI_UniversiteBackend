@@ -11,6 +11,6 @@ public interface IParcoursRepository : IRepository<Parcours>
     
     Task<Parcours> AddUeAsync(Parcours parcours, Ue ue);
     Task<Parcours> AddUeAsync(long idParcours, long idUe);
-    Task<Parcours> AddUeAsync(Parcours ? parcours, List<Etudiant> ues);
+    Task<Parcours> AddUeAsync(Parcours ? parcours, List<Ue> ues);
     Task<Parcours> AddUeAsync(long idParcours, long[] idUes);
 }

@@ -34,7 +34,7 @@ public class CreateParcoursUseCase(IRepositoryFactory repositoryFactory)
         // Si un parcours avec le même nom existe déjà, on lève une exception personnalisée
         if (existe is {Count:>0}) throw new DuplicateNomException(parcours.NomParcours+ " - ce parcours existe déjà");
 
-        if (parcours.NomParcours.Length < 3)
+        if (parcours.NomParcours.Length < 2)
             throw new ParcoursNameTooSmallException(parcours.NomParcours + " - ce nom de parcours est trop court");
     }
 }

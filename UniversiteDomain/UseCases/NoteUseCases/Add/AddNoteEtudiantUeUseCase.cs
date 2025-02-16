@@ -26,34 +26,49 @@ public class AddNoteEtudiantUeUseCase(IRepositoryFactory repositoryFactory)
     private async Task CheckBusinessRules(long idUe, long idEtudiant, float note)
     {
         // Vérification des paramètres
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(idUe);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(idEtudiant);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(note);
-        
-        // Vérifions tout d'abord que nous sommes bien connectés aux datasources
+        if (idUe <= 0)
+            throw new ArgumentOutOfRangeException(nameof(idUe), "L'id de l'UE doit être supérieur à 0.");
+        if (idEtudiant <= 0)
+            throw new ArgumentOutOfRangeException(nameof(idEtudiant), "L'id de l'étudiant doit être supérieur à 0.");
+        // Note : 0 est une note valide, on vérifie donc seulement si la note est négative.
+        if (note < 0.0f)
+            throw new ArgumentOutOfRangeException(nameof(note), "La note ne peut pas être négative.");
+
+        // Vérifions que les repositories ne sont pas nuls
         ArgumentNullException.ThrowIfNull(repositoryFactory.EtudiantRepository());
         ArgumentNullException.ThrowIfNull(repositoryFactory.UeRepository());
         ArgumentNullException.ThrowIfNull(repositoryFactory.NoteRepository());
         ArgumentNullException.ThrowIfNull(repositoryFactory.ParcoursRepository());
-        
-        // Check 1 : Une note est comprise entre 0 et 20
-        if (note < 0.0 || note > 20.0)
-        {
+
+        // Check 1 : La note doit être comprise entre 0 et 20
+        if (note < 0.0f || note > 20.0f)
             throw new NoteOutOfRangeException("La note doit être comprise entre 0 et 20");
-        }
+
+        // Vérifier que l'UE et l'étudiant existent
+        List<Etudiant> etudiants = await repositoryFactory.EtudiantRepository()
+            .FindByConditionAsync(e => e.Id == idEtudiant);
+        if (etudiants.Count == 0)
+            throw new EtudiantNotFoundException("AddNoteEtudiantUeUseCase : L'étudiant n'existe pas");
+        Etudiant etudiant = etudiants.First();
         
-        // Vérifier que l'UE et l'étudiant existent au préalable
-        List<Etudiant> etudiants = await repositoryFactory.EtudiantRepository().FindByConditionAsync(e=>e.Id.Equals(idEtudiant));
-        if (etudiants is { Count: 0 }) throw new EtudiantNotFoundException("AddNoteEtudiantUeUseCase : L'étudiant n'existe pas");
-        List<Ue> ue = await repositoryFactory.UeRepository().FindByConditionAsync(p=>p.Id.Equals(idUe));
-        if (ue is { Count: 0 }) throw new UeNotFoundException("AddNoteEtudiantUeUseCase : L'UE n'existe pas");
+        List<Ue> ues = await repositoryFactory.UeRepository()
+            .FindByConditionAsync(u => u.Id == idUe);
+        if (ues.Count == 0)
+            throw new UeNotFoundException("AddNoteEtudiantUeUseCase : L'UE n'existe pas");
+        Ue ue = ues.First();
+
+        // Check 2 : Un étudiant ne peut avoir une note que dans une UE appartenant au parcours dans lequel il est inscrit.
+        if (etudiant.ParcoursSuivi == null)
+            throw new InscriptionNotFoundException("AddNoteEtudiantUeUseCase : L'étudiant n'est inscrit à aucun parcours");
+        Parcours parcours = etudiant.ParcoursSuivi;
+        var associatedUeIds = parcours.UesEnseignees.Select(u => u.Id).ToArray();
         
-        // Check 2 : Un étudiant ne peut avoir une note que dans une Ue du parcours dans lequel il est inscrit
-        List<Parcours> parcours = await repositoryFactory.ParcoursRepository().FindByConditionAsync(p => p.Inscrits.Find(inscrit => inscrit.Id == idEtudiant) != null && p.UesEnseignees.Find(ueEns => ueEns.Id == idUe) != null);
-        if (parcours is { Count: 0 }) throw new InscriptionNotFoundException("AddNoteEtudiantUeUseCase : Aucune inscription trouvé pour cet étudiant et cette UE");
-        
-        // Check 3 : Un étudiant n'a qu'une note au maximum par Ue
-        List<Note> notes = await repositoryFactory.NoteRepository().FindByConditionAsync(n => n.idUe.Equals(idUe) && n.idEtud.Equals(idEtudiant));
-        if (notes is { Count: 1 }) throw new DuplicateNoteException("AddNoteEtudiantUeUseCase : Une note existe déjà pour cet étudiant");
+        if (parcours.UesEnseignees == null || !parcours.UesEnseignees.Any(u => u.Id == idUe))
+            throw new InscriptionNotFoundException("AddNoteEtudiantUeUseCase : L'UE n'est pas dans ce parcours");
+
+        // Check 3 : Un étudiant ne peut avoir qu'une seule note par UE.
+        var notes = await repositoryFactory.NoteRepository().FindByConditionAsync(n => n.idUe == idUe && n.idEtud == idEtudiant);
+        if (notes != null && notes.Count > 0)
+            throw new DuplicateNoteException("AddNoteEtudiantUeUseCase : Une note existe déjà pour cet étudiant dans cette UE");
     }
 }

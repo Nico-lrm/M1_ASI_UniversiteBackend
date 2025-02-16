@@ -7,8 +7,8 @@ public class Ue
     public string Intitule { get; set; } = String.Empty;
     
     // ManyToMany : une Ue est enseignée dans plusieurs parcours
-    public List<Parcours>? EnseigneeDans { get; set; } = new();
-    public List<Note>? Notes { get; set; } = new();
+    public List<Parcours>? EnseigneeDans { get; set; } = new List<Parcours>();
+    public List<Note>? Notes { get; set; } = new List<Note>();
     
     public override string ToString()
     {
